@@ -22,11 +22,11 @@ pub struct JCLITransactionWrapper {
 }
 
 impl JCLITransactionWrapper {
-    pub fn new() -> JCLITransactionWrapper {
+    pub fn new() -> Self {
         JCLITransactionWrapper::from_genesis("")
     }
 
-    pub fn from_genesis(genesis_hash: &str) -> JCLITransactionWrapper {
+    pub fn from_genesis(genesis_hash: &str) -> Self {
         JCLITransactionWrapper {
             staging_file_path: PathBuf::from(""),
             commands: TransactionCommands::new(),
@@ -34,7 +34,7 @@ impl JCLITransactionWrapper {
         }
     }
 
-    pub fn new_transaction(genesis_hash: &str) -> JCLITransactionWrapper {
+    pub fn new_transaction(genesis_hash: &str) -> Self {
         let mut transaction_builder = JCLITransactionWrapper::from_genesis(genesis_hash);
         transaction_builder.assert_new_transaction();
         transaction_builder
@@ -47,7 +47,7 @@ impl JCLITransactionWrapper {
         output_amount: &i32,
         sender: &U,
         genesis_hash: &str,
-    ) -> JCLITransactionWrapper {
+    ) -> Self {
         let mut transaction_builder = JCLITransactionWrapper::new_transaction(genesis_hash);
         transaction_builder
             .assert_add_input(&utxo.in_txid, &utxo.in_idx, &input_amount)
@@ -65,7 +65,7 @@ impl JCLITransactionWrapper {
         output_amount: &i32,
         sender: &U,
         genesis_hash: &str,
-    ) -> JCLITransactionWrapper {
+    ) -> Self {
         let mut transaction_builder = JCLITransactionWrapper::new_transaction(genesis_hash);
         transaction_builder
             .assert_add_input(&transaction_id, &transaction_index, &input_amount)
@@ -75,7 +75,7 @@ impl JCLITransactionWrapper {
         transaction_builder
     }
 
-    pub fn assert_new_transaction<'a>(&'a mut self) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_new_transaction<'a>(&'a mut self) -> &'a mut Self {
         self.generate_new_random_staging_file_path();
         let output = process_utils::run_process_and_get_output(
             self.commands
@@ -91,12 +91,21 @@ impl JCLITransactionWrapper {
         self.staging_file_path = staging_file_path;
     }
 
+    pub fn assert_add_certificate<'a>(&'a mut self, certificate: &str) -> &'a mut Self {
+        let output = process_utils::run_process_and_get_output(
+            self.commands
+                .get_add_certificate_command(&certificate, &self.staging_file_path),
+        );
+        process_assert::assert_process_exited_successfully(output);
+        self
+    }
+
     pub fn assert_add_input<'a>(
         &'a mut self,
         tx_id: &str,
         tx_index: &i32,
         amount: &i32,
-    ) -> &'a mut JCLITransactionWrapper {
+    ) -> &'a mut Self {
         let output =
             process_utils::run_process_and_get_output(self.commands.get_add_input_command(
                 &tx_id,
@@ -130,22 +139,15 @@ impl JCLITransactionWrapper {
         &'a mut self,
         utxo: &UtxoData,
         amount: &i32,
-    ) -> &'a mut JCLITransactionWrapper {
+    ) -> &'a mut Self {
         self.assert_add_input(&utxo.in_txid, &utxo.in_idx, &amount)
     }
 
-    pub fn assert_add_input_from_utxo<'a>(
-        &'a mut self,
-        utxo: &UtxoData,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_add_input_from_utxo<'a>(&'a mut self, utxo: &UtxoData) -> &'a mut Self {
         self.assert_add_input(&utxo.in_txid, &utxo.in_idx, &utxo.out_value)
     }
 
-    pub fn assert_add_account<'a>(
-        &'a mut self,
-        account_addr: &str,
-        amount: &i32,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_add_account<'a>(&'a mut self, account_addr: &str, amount: &i32) -> &'a mut Self {
         let output = process_utils::run_process_and_get_output(
             self.commands
                 .get_add_account_command(&account_addr, &amount, &self.staging_file_path),
@@ -162,18 +164,11 @@ impl JCLITransactionWrapper {
         );
     }
 
-    pub fn assert_add_account_from_legacy<'a>(
-        &'a mut self,
-        fund: &Fund,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_add_account_from_legacy<'a>(&'a mut self, fund: &Fund) -> &'a mut Self {
         self.assert_add_account(&fund.address, &fund.value)
     }
 
-    pub fn assert_add_output<'a>(
-        &'a mut self,
-        addr: &str,
-        amount: &i32,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_add_output<'a>(&'a mut self, addr: &str, amount: &i32) -> &'a mut Self {
         let output = process_utils::run_process_and_get_output(
             self.commands
                 .get_add_output_command(&addr, &amount, &self.staging_file_path),
@@ -182,9 +177,23 @@ impl JCLITransactionWrapper {
         self
     }
 
-    pub fn assert_finalize<'a>(&'a mut self) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_finalize<'a>(&'a mut self) -> &'a mut Self {
         let output = process_utils::run_process_and_get_output(
             self.commands.get_finalize_command(&self.staging_file_path),
+        );
+        process_assert::assert_process_exited_successfully(output);
+        self
+    }
+
+    pub fn assert_finalize_with_spending_address<'a>(
+        &'a mut self,
+        spending_address: &str,
+    ) -> &'a mut Self {
+        let output = process_utils::run_process_and_get_output(
+            self.commands.get_finalize_with_spending_address_command(
+                &spending_address,
+                &self.staging_file_path,
+            ),
         );
         process_assert::assert_process_exited_successfully(output);
         self
@@ -211,7 +220,7 @@ impl JCLITransactionWrapper {
         &'a mut self,
         private_key: &str,
         transaction_type: &str,
-    ) -> &'a mut JCLITransactionWrapper {
+    ) -> &'a mut Self {
         let witness = self.create_witness_from_key(&private_key, &transaction_type);
         self.assert_make_witness(&witness);
         self.assert_add_witness(&witness);
@@ -222,26 +231,20 @@ impl JCLITransactionWrapper {
         &'a mut self,
         private_key: &str,
         transaction_type: &str,
-    ) -> &'a mut JCLITransactionWrapper {
+    ) -> &'a mut Self {
         let witness = self.create_witness_from_key(&private_key, &transaction_type);
         self.seal_with_witness(&witness);
         self
     }
 
-    pub fn seal_with_witness<'a>(
-        &'a mut self,
-        witness: &Witness,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn seal_with_witness<'a>(&'a mut self, witness: &Witness) -> &'a mut Self {
         self.assert_make_witness(&witness);
         self.assert_add_witness(&witness);
         self.assert_seal();
         self
     }
 
-    pub fn assert_make_witness<'a>(
-        &'a mut self,
-        witness: &Witness,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_make_witness<'a>(&'a mut self, witness: &Witness) -> &'a mut Self {
         let output =
             process_utils::run_process_and_get_output(self.commands.get_make_witness_command(
                 &witness.block_hash,
@@ -294,10 +297,7 @@ impl JCLITransactionWrapper {
         );
     }
 
-    pub fn assert_add_witness<'a>(
-        &'a mut self,
-        witness: &Witness,
-    ) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_add_witness<'a>(&'a mut self, witness: &Witness) -> &'a mut Self {
         let output = process_utils::run_process_and_get_output(
             self.commands
                 .get_add_witness_command(&witness.file, &self.staging_file_path),
@@ -306,7 +306,7 @@ impl JCLITransactionWrapper {
         self
     }
 
-    pub fn assert_seal<'a>(&'a mut self) -> &'a mut JCLITransactionWrapper {
+    pub fn assert_seal<'a>(&'a mut self) -> &'a mut Self {
         let output = process_utils::run_process_and_get_output(
             self.commands.get_seal_command(&self.staging_file_path),
         );
