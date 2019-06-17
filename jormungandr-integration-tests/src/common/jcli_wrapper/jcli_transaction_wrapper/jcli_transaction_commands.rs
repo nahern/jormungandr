@@ -1,9 +1,11 @@
 #![allow(dead_code)]
 
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
 use crate::common::configuration;
+use crate::common::configuration::genesis_model::LinearFees;
 
 #[derive(Debug)]
 pub struct TransactionCommands {}
@@ -86,13 +88,11 @@ impl TransactionCommands {
         command
     }
 
-    pub fn get_finalize_with_fee_command(
+    pub fn get_finalize_with_fee_command<P: AsRef<Path>>(
         &self,
         address: &str,
-        fee_constant: &i32,
-        fee_coefficient: &i32,
-        fee_certificate: &i32,
-        staging_file: &PathBuf,
+        linear_fees: &LinearFees,
+        staging_file: &P,
     ) -> Command {
         let mut command = Command::new(configuration::get_jcli_app().as_os_str());
         command
@@ -100,13 +100,13 @@ impl TransactionCommands {
             .arg("finalize")
             .arg(address)
             .arg("--fee-certificate")
-            .arg(fee_certificate.to_string())
+            .arg(linear_fees.certificate.to_string())
             .arg("--fee-coefficient")
-            .arg(fee_coefficient.to_string())
+            .arg(linear_fees.coefficient.to_string())
             .arg("--fee-constant")
-            .arg(fee_constant.to_string())
+            .arg(linear_fees.constant.to_string())
             .arg("--staging")
-            .arg(staging_file.as_os_str());
+            .arg(staging_file.as_ref().as_os_str());
         command
     }
 
@@ -182,13 +182,19 @@ impl TransactionCommands {
         command
     }
 
-    pub fn get_transaction_info_command(&self, staging_file: &PathBuf) -> Command {
+    pub fn get_transaction_info_command<P: AsRef<Path>>(
+        &self,
+        format: &str,
+        staging_file: &P,
+    ) -> Command {
         let mut command = Command::new(configuration::get_jcli_app().as_os_str());
         command
             .arg("transaction")
             .arg("info")
+            .arg("--format")
+            .arg(format)
             .arg("--staging")
-            .arg(staging_file.as_os_str());
+            .arg(staging_file.as_ref().as_os_str());
         command
     }
 }

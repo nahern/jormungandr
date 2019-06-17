@@ -199,9 +199,7 @@ impl JCLITransactionWrapper {
         let output =
             process_utils::run_process_and_get_output(self.commands.get_finalize_with_fee_command(
                 &address,
-                &linear_fee.constant,
-                &linear_fee.coefficient,
-                &linear_fee.certificate,
+                &linear_fee,
                 &self.staging_file_path,
             ));
         process_assert::assert_process_exited_successfully(output);
@@ -360,10 +358,10 @@ impl JCLITransactionWrapper {
         split.next().unwrap().to_string()
     }
 
-    pub fn get_transaction_info(&self) -> String {
+    pub fn get_transaction_info(&self, format: &str) -> String {
         let output = process_utils::run_process_and_get_output(
             self.commands
-                .get_transaction_info_command(&self.staging_file_path),
+                .get_transaction_info_command(&format, &self.staging_file_path),
         );
         let content = output.as_single_line();
         let mut split = content.split_whitespace();

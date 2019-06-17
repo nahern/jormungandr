@@ -196,7 +196,7 @@ pub fn test_account_is_created_if_transaction_out_is_account() {
     let account_state =
         jcli_wrapper::assert_rest_account_get_stats(&reciever.address, &jormungandr_rest_address);
     assert_eq!(
-        account_state.value, transfer_amount,
+        account_state.value, transfer_amount as u32,
         "Account did not receive correct amount of funds"
     );
 
@@ -517,7 +517,6 @@ pub fn test_input_with_no_spending_utxo_is_rejected_by_node() {
 }
 
 #[test]
-#[ignore] //#449
 pub fn test_transaction_with_non_zero_linear_fees() {
     let sender = startup::create_new_utxo_address();
     let reciever = startup::create_new_utxo_address();
@@ -551,9 +550,6 @@ pub fn test_transaction_with_non_zero_linear_fees() {
         )
         .seal_with_witness_deafult(&sender.private_key, "utxo");
     let transaction_message = transaction_builder.assert_transaction_to_message();
-
-    transaction_builder.get_transaction_info();
-
     jcli_wrapper::assert_transaction_in_block(&transaction_message, &jormungandr_rest_address);
 
     let utxo = startup::get_utxo_for_address(&reciever, &jormungandr_rest_address);
