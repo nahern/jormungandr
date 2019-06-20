@@ -1,8 +1,8 @@
-+++
-title = "How to delegate from a new account?"
-author = ["alejandro garcia"]
-draft = false
-+++
+---
+title: "How to delegate from a new account?"
+author: ["alejandro garcia"]
+draft: false
+---
 
 Follow the instructions below or watch this video tutorial: [Jormungandr Delegating stake script](https://youtu.be/cr4vTPPE8ps)
 
@@ -11,7 +11,7 @@ In this case we are going to use the `create-account-and-delegate.sh` script
 The script is quite complex, so in this section we describe what the scripts does.
 
 
-## Creating  new account {#creating-new-account}
+## Creating  new account 
 
 The start of this script creates a new account with an address.
 
@@ -19,7 +19,6 @@ The start of this script creates a new account with an address.
 ##
 # 1. create an account
 ##
-
 
 # send money to this address
 
@@ -49,7 +48,7 @@ And the blockchain shows that creating the new account is pending:
 ```
 
 
-### Verifying the account information {#verifying-the-account-information}
+### Verifying the account information 
 
 Once the transaction to create the new account is completed we can retrieve the account information.
 
@@ -67,7 +66,7 @@ value: 1000
 ```
 
 
-## Creating a new delegation certificate {#creating-a-new-delegation-certificate}
+## Creating a new delegation certificate 
 
 The script continues to the next step of creating a delegate certificate.
 
@@ -94,7 +93,7 @@ Success!
 We know that, the `Success!` message means that it the transaction has been sent but **not** that it was accepted.
 
 
-### Monitoring the logs {#monitoring-the-logs}
+### Monitoring the logs 
 
 So now we need to monitor the logs:
 
@@ -121,7 +120,7 @@ jcli rest v0 message logs -h http://127.0.0.1:8443/api
 We see that the second transaction, where we delegate the stake is **Pending**. This is valid once the transaction is `InABlock`.
 
 
-### Checking the delegation and balance in the account {#checking-the-delegation-and-balance-in-the-account}
+### Checking the delegation and balance in the account 
 
 We can check the balance in the account:
 
@@ -132,39 +131,7 @@ jcli rest v0 account get ta1shap40ruglnter32nv6vj5084ew8rrxplkv52zakak2jpl8yhmdm
 ```text
 ---
  counter: 1
- delegation:
-   - 36
-   - 135
-   - 250
-   - 129
-   - 133
-   - 190
-   - 3
-   - 151
-   - 18
-   - 98
-   - 152
-   - 190
-   - 118
-   - 34
-   - 196
-   - 68
-   - 84
-   - 248
-   - 116
-   - 122
-   - 168
-   - 187
-   - 130
-   - 249
-   - 72
-   - 39
-   - 25
-   - 27
-   - 67
-   - 126
-   - 213
-   - 179
+ delegation: 935e3de07b841d0ad3d854de88bad3d956299017a96be3fc32f7a1b404ffbe92
  value: 990
 ```
 

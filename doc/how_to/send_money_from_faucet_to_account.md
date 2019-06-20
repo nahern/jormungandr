@@ -1,8 +1,8 @@
-+++
-title = "How to send money from the faucet to an account address?"
-author = ["alejandro garcia"]
-draft = false
-+++
+---
+title: "How to send money from the faucet to an account address?"
+author: ["alejandro garcia"]
+draft: false
+---
 
 Follow the instructions below or watch this video tutorial: [Jormungandr send transactions](https://youtu.be/6YFoitp-hsw)
 
@@ -14,36 +14,37 @@ It's important to note that there are two ways to do this by: account address an
 In this tutorial we cover the first one.
 
 
-## Creating a receiver account {#creating-a-receiver-account}
+## Creating a receiver account 
 
 Now we are going to create an account that will receive funds from the faucet
 
+<a id="code-snippet--creating-receiver-account"></a>
 ```bash
-jcli key generae --type=Ed25519Extended > receiver_secret.key
+jcli key generate --type=Ed25519Extended > receiver_secret.key
 cat receiver_secret.key | jcli key to-public > receiver_public.key
 jcli address account --testing $(cat receiver_public.key) | tee receiver_account.txt
 ```
 
 ```text
-ta1shl6qd56d2ngld50tewfjh52hnv6ktkdpqe2k3achj36mcwdcjj5k7al25c
+ta1s5gpyg7tnvzjyq0t46xehcu5h2k2rwkjmgladja9ahlljygz0azcwvd45x2
 ```
 
 with the receiver account, we can now send funds.
 
 
-## Withdrawing from the faucet {#withdrawing-from-the-faucet}
+## Withdrawing from the faucet 
 
 Now we are going to use the faucet-send-money.sh script that the bootstrap script created for us:
 
+<a id="code-snippet--withdraw-from-faucet"></a>
 ```bash
-chmod +x faucet-send-money.sh
 ./faucet-send-money.sh $(cat receiver_account.txt) 1000
 ```
 
 ```text
-## Sending 1000 to ta1shl6qd56d2ngld50tewfjh52hnv6ktkdpqe2k3achj36mcwdcjj5k7al25c
+## Sending 1000 to ta1s5gpyg7tnvzjyq0t46xehcu5h2k2rwkjmgladja9ahlljygz0azcwvd45x2
 discrimination: testing
-account: ed25519_pk1l7srdxn2568mdr67tjv4az4umx4janggx2450w9u5wk7rnwy549s65kjw8
+account: ed25519_pk1zqfz8jumq53qr6aw3kd789964jsm45k68ltvhf0dllu3zqnlgkrsjgzg86
 Success!
 ```
 
@@ -51,17 +52,18 @@ It will show a Success! message **but** this is a partial success. It means that
 Keep in mind, that blocks are created differently depending on the selected consensus mode (BFT or Genesis).
 
 
-## Checking that the transaction is in the blockchain {#checking-that-the-transaction-is-in-the-blockchain}
+## Checking that the transaction is in the blockchain 
 
+<a id="code-snippet--checking-transaction-in-blockchain"></a>
 ```bash
 jcli rest v0 message logs -h http://127.0.0.1:8443/api
 ```
 
 ```text
 ---
-- fragment_id: 4526bc7017e8600f0916ebdf2ac296be9925327c8cc12d3ba91fd1e7b33cb6b2
-  last_updated_at: "2019-06-19T01:00:12.053811951+00:00"
-  received_at: "2019-06-19T01:00:12.053811836+00:00"
+- fragment_id: cd9f68517222d70537fd9dda056c4ca3036b57fc0733b907ce66deee36d4ac51
+  last_updated_at: "2019-06-20T23:20:01.764334883+00:00"
+  received_at: "2019-06-20T23:20:01.764334797+00:00"
   received_from: Rest
   status: Pending
 ```
@@ -69,6 +71,7 @@ jcli rest v0 message logs -h http://127.0.0.1:8443/api
 If you do it immediately you will see a status of Pending. Wait and try again until the transaction is **InABlock**.
 The waiting (slot) time is variable in the Genesis consensus and fixed in a BFT consensus.
 
+<a id="code-snippet--checking-transaction-in-blockchain-InABlock"></a>
 ```bash
 sleep 20
 jcli rest v0 message logs -h http://127.0.0.1:8443/api
@@ -76,22 +79,22 @@ jcli rest v0 message logs -h http://127.0.0.1:8443/api
 
 ```text
 ---
-- fragment_id: 4526bc7017e8600f0916ebdf2ac296be9925327c8cc12d3ba91fd1e7b33cb6b2
-  last_updated_at: "2019-06-19T01:02:14.013149863+00:00"
-  received_at: "2019-06-19T01:00:12.053811836+00:00"
+- fragment_id: cd9f68517222d70537fd9dda056c4ca3036b57fc0733b907ce66deee36d4ac51
+  last_updated_at: "2019-06-20T23:22:44.043796512+00:00"
+  received_at: "2019-06-20T23:20:01.764334797+00:00"
   received_from: Rest
   status:
     InABlock:
-      date: "0.49"
+      date: "0.75"
 ```
 
 Now the transaction was accepted by the node and included into block 49.
 
 
-## Reviewing the faucet and receiver balances {#reviewing-the-faucet-and-receiver-balances}
+## Reviewing the faucet and receiver balances 
 
 
-### Checking the receiver account balance {#checking-the-receiver-account-balance}
+### Checking the receiver account balance 
 
 Let's check the balance of the faucet account
 
@@ -110,7 +113,7 @@ value: 1000
 We see that we have the 1,000 tokens we sent.
 
 
-### Checking the faucet account balance {#checking-the-faucet-account-balance}
+### Checking the faucet account balance 
 
 ```bash
 jcli rest v0 account get $FAUCET_ACCOUNT -h  http://127.0.0.1:8443/api
@@ -119,39 +122,7 @@ jcli rest v0 account get $FAUCET_ACCOUNT -h  http://127.0.0.1:8443/api
 ```text
 ---
 counter: 1
-delegation:
-  - 36
-  - 135
-  - 250
-  - 129
-  - 133
-  - 190
-  - 3
-  - 151
-  - 18
-  - 98
-  - 152
-  - 190
-  - 118
-  - 34
-  - 196
-  - 68
-  - 84
-  - 248
-  - 116
-  - 122
-  - 168
-  - 187
-  - 130
-  - 249
-  - 72
-  - 39
-  - 25
-  - 27
-  - 67
-  - 126
-  - 213
-  - 179
+delegation: 935e3de07b841d0ad3d854de88bad3d956299017a96be3fc32f7a1b404ffbe92
 value: 999998990
 ```
 

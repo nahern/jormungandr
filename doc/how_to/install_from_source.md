@@ -1,8 +1,8 @@
-+++
-title = "How to install from source?"
-author = ["alejandro garcia"]
-draft = false
-+++
+---
+title: "How to install from source?"
+author: ["alejandro garcia"]
+draft: false
+---
 
 Follow the instructions below or watch these video tutorials:
 
@@ -12,6 +12,7 @@ Follow the instructions below or watch these video tutorials:
 Here are the steps to install jormungandr  from source.
 First you need to have configured [rustup](https://www.rust-lang.org/tools/install).
 
+<a id="code-snippet--installation-process"></a>
 ```bash
 #Create a directory to store our experiments
 mkdir -p ~/jor-test
@@ -31,10 +32,11 @@ chmod +x ./scripts/bootstrap
 ```
 
 
-## Verify that jcli issue installed {#verify-that-jcli-issue-installed}
+## Verify that jcli is installed 
 
 Let's check if the jcli got installed.
 
+<a id="code-snippet--verify-jcli-installed"></a>
 ```bash
 jcli -V
 ```
